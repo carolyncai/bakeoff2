@@ -26,6 +26,8 @@ float cursor_centerX = 0;
 float cursor_centerY = 0;
 float onClickMouseX = 0;
 float onClickMouseY = 0;
+float onClickTransX = 0;
+float onClickTransY = 0;
 float onClickCursorScale = screenZ;
 float onClickCursorRotation = screenRotation;
 
@@ -120,6 +122,11 @@ void draw() {
   rotate(radians(t.rotation));
   fill(255, 0, 0); //set color to semi translucent
   rect(0, 0, t.z, t.z);
+  // translucent circle on the center
+  fill(0,0,0,100);
+  strokeWeight(1);
+  stroke(0);
+  ellipse(0, 0, 15, 15);
   popMatrix();
 
   //===========DRAW CURSOR SQUARE=================
@@ -132,6 +139,11 @@ void draw() {
   stroke(160);
   rect(0,0, screenZ, screenZ);
   drawCursorDots();
+  // translucent circle on the center
+  fill(255,255,255,100);
+  strokeWeight(1);
+  stroke(255);
+  ellipse(0, 0, 15, 15);
   popMatrix();
   
     //===========DRAW EXAMPLE CONTROLS=================
@@ -141,53 +153,14 @@ void draw() {
 }
 
 
-//my example design for control, which is terrible
-//void scaffoldControlLogic()
-//{
-//  //upper left corner, rotate counterclockwise
-//  text("CCW", inchesToPixels(.2f), inchesToPixels(.2f));
-//  if (mousePressed && dist(0, 0, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenRotation--;
-
-//  //upper right corner, rotate clockwise
-//  text("CW", width-inchesToPixels(.2f), inchesToPixels(.2f));
-//  if (mousePressed && dist(width, 0, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenRotation++;
-
-//  //lower left corner, decrease Z
-//  text("-", inchesToPixels(.2f), height-inchesToPixels(.2f));
-//  if (mousePressed && dist(0, height, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenZ-=inchesToPixels(.02f);
-
-//  //lower right corner, increase Z
-//  text("+", width-inchesToPixels(.2f), height-inchesToPixels(.2f));
-//  if (mousePressed && dist(width, height, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenZ+=inchesToPixels(.02f);
-
-//  //left middle, move left
-//  text("left", inchesToPixels(.2f), height/2);
-//  if (mousePressed && dist(0, height/2, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenTransX-=inchesToPixels(.02f);
-
-//  text("right", width-inchesToPixels(.2f), height/2);
-//  if (mousePressed && dist(width, height/2, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenTransX+=inchesToPixels(.02f);
-  
-//  text("up", width/2, inchesToPixels(.2f));
-//  if (mousePressed && dist(width/2, 0, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenTransY-=inchesToPixels(.02f);
-  
-//  text("down", width/2, height-inchesToPixels(.2f));
-//  if (mousePressed && dist(width/2, height, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenTransY+=inchesToPixels(.02f);
-//}
-
 void controlLogic() {
   
   switch (currentOp) {
     case CURSOR_TRANSLATE:
-      screenTransX = mouseX-width/2;
-      screenTransY = mouseY-height/2;
+      float dx = mouseX - onClickMouseX; 
+      float dy = mouseY - onClickMouseY; 
+      screenTransX = onClickTransX + dx;
+      screenTransY = onClickTransY + dy;
       break;
       
     case CURSOR_SCALE:
@@ -218,7 +191,7 @@ void drawCursorDots()
 {
    cursorDots.clear();
    float newX = 0, newY = 0;
-   float diam = max(18, screenZ*0.1);
+   float diam = max(18, screenZ*0.1); // default size, sometimes it's too small otherwise
    fill(220);
    // top-left
    ellipse(-screenZ/2, -screenZ/2, diam, diam);
@@ -258,27 +231,39 @@ boolean isMouseInsideCursorDot()
   return false;
 }
 
-// hmm does this work with rotations...no!! it doesnt.
+// hmm this does not quite work with rotations haha....someone pls help
 boolean isMouseInsideCursorSquare()
 {
+  println("inside isMouseInsideCursorSquare");
   float centerX = screenTransX+width/2;
   float centerY = screenTransY+height/2;
   float w = screenZ;
+  boolean result = false;
+  
   pushMatrix();
-  println("screenRotation = " + screenRotation);
+  translate(centerX, centerY);
   rotate(radians(screenRotation));
-  float x = centerX - w/2;
-  float y = centerY - w/2;
-  if (mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + w) {
-    println("mouse is inside cursor square!!!!");
-    popMatrix();
-    return true;
-  }
-  else {
-    println("mouse is NOT inside cursor square!!!!");
-    popMatrix();
-    return false;
-  }
+  
+  //println("mouse X = " + mouseX);
+  //println("mouse Y = " + mouseY);
+  
+  //println("top left x = " + (centerX - w/2));
+  //println("top left y = " + (centerY - w/2));
+  
+  //println("bottom right x = " + (centerX + w/2));
+  //println("bottom right y = " + (centerY + w/2));
+  
+  result = (mouseX > (centerX - w/2)) && (mouseX < (centerX + w/2)) && 
+           (mouseX > (centerY - w/2)) && (mouseY < (centerY + w/2));
+  
+  popMatrix();
+  
+  // sanity check since sometimes it bugs out lololol (cry)
+  if (!result)
+    result = dist(centerX, centerY, mouseX, mouseY) <= w/2;
+  
+  println("result is " + result);
+  return result;
 }
 
 void mousePressed()
@@ -295,9 +280,13 @@ void mousePressed()
     onClickMouseX = mouseX;
     onClickMouseY = mouseY;
     //println("mouse x = " + onClickMouseX + ", mouse y = " + onClickMouseY);
+    onClickTransX = screenTransX;
+    onClickTransY = screenTransY;
     onClickCursorScale = screenZ;
     onClickCursorRotation = screenRotation;
     
+    // uhh reset this just in case
+    currentOp = NO_OP;
     if (isMouseInsideCursorDot())
       currentOp = CURSOR_SCALE;
     else if (isMouseInsideCursorSquare())
