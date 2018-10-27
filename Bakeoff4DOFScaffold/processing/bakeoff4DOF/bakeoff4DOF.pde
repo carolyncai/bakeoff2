@@ -31,6 +31,9 @@ float onClickTransY = 0;
 float onClickCursorScale = screenZ;
 float onClickCursorRotation = screenRotation;
 
+float onClickTargetX = 0;
+float onClickTargetY = 0;
+
 private class Target
 {
   float x = 0;
@@ -62,7 +65,7 @@ final int CURSOR_SCALE = 0;
 final int CURSOR_TRANSLATE = 1;
 final int CURSOR_ROTATE = 2;
 //final int TARGET_SCALE = 3;
-//final int TARGET_TRANSLATE = 4;
+final int TARGET_TRANSLATE = 4;
 //final int TARGET_ROTATE = 5;
 int currentOp = NO_OP;
 
@@ -127,6 +130,10 @@ void draw() {
   strokeWeight(1);
   stroke(0);
   ellipse(0, 0, 15, 15);
+  // target lines
+  strokeWeight(3f);
+  stroke(255, 255, 255);
+  drawTargetLines(t);
   popMatrix();
 
   //===========DRAW CURSOR SQUARE=================
@@ -139,6 +146,7 @@ void draw() {
   stroke(160);
   rect(0,0, screenZ, screenZ);
   drawCursorDots();
+  drawCursorLines();
   // translucent circle on the center
   fill(255,255,255,100);
   strokeWeight(1);
@@ -181,7 +189,14 @@ void controlLogic() {
       
       if (crossProd.z < 0) screenRotation = onClickCursorRotation + degrees(angle);
       else screenRotation = onClickCursorRotation - degrees(angle);
+      break;
      
+     case TARGET_TRANSLATE:
+       dx = mouseX - onClickMouseX;
+       dy = mouseY - onClickMouseY;
+       Target t = targets.get(trialIndex);
+       t.x = onClickTargetX + dx;
+       t.y = onClickTargetY + dy;
     default:
       break;
   }
@@ -216,7 +231,22 @@ void drawCursorDots()
    newX = screenX(screenZ/2, screenZ/2);
    newY = screenY(screenZ/2, screenZ/2);
    cursorDots.add(new CursorDot(newX, newY, diam/2));
-   
+}
+
+void drawCursorLines()
+{
+  float offset = min(30, screenZ*0.3);
+  float coord = screenZ/2 + offset;
+  line(0, -coord, 0, coord);
+  line(-coord, 0, coord, 0);
+}
+
+void drawTargetLines(Target t)
+{
+  float offset = min(40, screenZ*0.4);
+  float coord = t.z/2 + offset;
+  line(0, -coord, 0, coord);
+  line(-coord, 0, coord, 0);
 }
 
 boolean isMouseInsideCursorDot() 
@@ -232,17 +262,17 @@ boolean isMouseInsideCursorDot()
 }
 
 // hmm this does not quite work with rotations haha....someone pls help
-boolean isMouseInsideCursorSquare()
+boolean isMouseInsideSquare(float x, float y, float z, float rotation)
 {
   println("inside isMouseInsideCursorSquare");
-  float centerX = screenTransX+width/2;
-  float centerY = screenTransY+height/2;
-  float w = screenZ;
+  float centerX = x+width/2;
+  float centerY = y+height/2;
+  float w = z;
   boolean result = false;
   
   pushMatrix();
   translate(centerX, centerY);
-  rotate(radians(screenRotation));
+  rotate(radians(rotation));
   
   //println("mouse X = " + mouseX);
   //println("mouse Y = " + mouseY);
@@ -285,12 +315,18 @@ void mousePressed()
     onClickCursorScale = screenZ;
     onClickCursorRotation = screenRotation;
     
+    Target t = targets.get(trialIndex);
+    onClickTargetX = t.x;
+    onClickTargetY = t.y;
+    
     // uhh reset this just in case
     currentOp = NO_OP;
     if (isMouseInsideCursorDot())
       currentOp = CURSOR_SCALE;
-    else if (isMouseInsideCursorSquare())
+    else if (isMouseInsideSquare(screenTransX, screenTransY, screenZ, screenRotation))
       currentOp = CURSOR_TRANSLATE;
+    else if (isMouseInsideSquare(t.x, t.y, t.z, t.rotation))
+      currentOp = TARGET_TRANSLATE;
     else
       currentOp = CURSOR_ROTATE;
 }
