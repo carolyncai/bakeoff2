@@ -21,6 +21,19 @@ float screenTransY = 0;
 float screenRotation = 0;
 float screenZ = 50f;
 
+// things to keep track of for transformations
+float cursor_centerX = 0;
+float cursor_centerY = 0;
+float onClickMouseX = 0;
+float onClickMouseY = 0;
+float onClickTransX = 0;
+float onClickTransY = 0;
+float onClickCursorScale = screenZ;
+float onClickCursorRotation = screenRotation;
+
+float onClickTargetX = 0;
+float onClickTargetY = 0;
+
 private class Target
 {
   float x = 0;
@@ -29,7 +42,32 @@ private class Target
   float z = 0;
 }
 
+private class CursorDot
+{
+  float x = 0;
+  float y = 0;
+  float radius = 0;
+  
+  CursorDot(float x, float y, float rad) {
+    this.x = x;
+    this.y = y;
+    this.radius = rad;
+  }
+}
+
 ArrayList<Target> targets = new ArrayList<Target>();
+
+ArrayList<CursorDot> cursorDots = new ArrayList<CursorDot>();
+
+// Operations
+final int NO_OP = -1;
+final int CURSOR_SCALE = 0;
+final int CURSOR_TRANSLATE = 1;
+final int CURSOR_ROTATE = 2;
+//final int TARGET_SCALE = 3;
+final int TARGET_TRANSLATE = 4;
+//final int TARGET_ROTATE = 5;
+int currentOp = NO_OP;
 
 float inchesToPixels(float inch)
 {
@@ -87,6 +125,13 @@ void draw() {
   rotate(radians(t.rotation));
   fill(255, 0, 0); //set color to semi translucent
   rect(0, 0, t.z, t.z);
+  // translucent circle on the center
+  fill(0,0,0,100);
+  strokeWeight(1);
+  stroke(0);
+  ellipse(0, 0, 15, 15);
+  // target lines
+  drawTargetLines(t);
   popMatrix();
 
   //===========DRAW CURSOR SQUARE=================
@@ -98,55 +143,160 @@ void draw() {
   strokeWeight(3f);
   stroke(160);
   rect(0,0, screenZ, screenZ);
+  drawCursorDots();
+  drawCursorLines();
+  // translucent circle on the center
+  fill(255,255,255,100);
+  strokeWeight(1);
+  stroke(255);
+  ellipse(0, 0, 15, 15);
   popMatrix();
   
     //===========DRAW EXAMPLE CONTROLS=================
   fill(255);
-  scaffoldControlLogic(); //you are going to want to replace this!
+  //scaffoldControlLogic(); //you are going to want to replace this!
   text("Trial " + (trialIndex+1) + " of " +trialCount, width/2, inchesToPixels(.5f));
 }
 
-//my example design for control, which is terrible
-void scaffoldControlLogic()
-{
-  //upper left corner, rotate counterclockwise
-  text("CCW", inchesToPixels(.2f), inchesToPixels(.2f));
-  if (mousePressed && dist(0, 0, mouseX, mouseY)<inchesToPixels(.5f))
-    screenRotation--;
 
-  //upper right corner, rotate clockwise
-  text("CW", width-inchesToPixels(.2f), inchesToPixels(.2f));
-  if (mousePressed && dist(width, 0, mouseX, mouseY)<inchesToPixels(.5f))
-    screenRotation++;
-
-  //lower left corner, decrease Z
-  text("-", inchesToPixels(.2f), height-inchesToPixels(.2f));
-  if (mousePressed && dist(0, height, mouseX, mouseY)<inchesToPixels(.5f))
-    screenZ-=inchesToPixels(.02f);
-
-  //lower right corner, increase Z
-  text("+", width-inchesToPixels(.2f), height-inchesToPixels(.2f));
-  if (mousePressed && dist(width, height, mouseX, mouseY)<inchesToPixels(.5f))
-    screenZ+=inchesToPixels(.02f);
-
-  //left middle, move left
-  text("left", inchesToPixels(.2f), height/2);
-  if (mousePressed && dist(0, height/2, mouseX, mouseY)<inchesToPixels(.5f))
-    screenTransX-=inchesToPixels(.02f);
-
-  text("right", width-inchesToPixels(.2f), height/2);
-  if (mousePressed && dist(width, height/2, mouseX, mouseY)<inchesToPixels(.5f))
-    screenTransX+=inchesToPixels(.02f);
+void controlLogic() {
   
-  text("up", width/2, inchesToPixels(.2f));
-  if (mousePressed && dist(width/2, 0, mouseX, mouseY)<inchesToPixels(.5f))
-    screenTransY-=inchesToPixels(.02f);
-  
-  text("down", width/2, height-inchesToPixels(.2f));
-  if (mousePressed && dist(width/2, height, mouseX, mouseY)<inchesToPixels(.5f))
-    screenTransY+=inchesToPixels(.02f);
+  switch (currentOp) {
+    case CURSOR_TRANSLATE:
+      float dx = mouseX - onClickMouseX; 
+      float dy = mouseY - onClickMouseY; 
+      screenTransX = onClickTransX + dx;
+      screenTransY = onClickTransY + dy;
+      break;
+      
+    case CURSOR_SCALE:
+      float init_dist_to_cursor = dist(cursor_centerX, cursor_centerY, onClickMouseX, onClickMouseY);
+      float curr_dist_to_cursor = dist(cursor_centerX, cursor_centerY, mouseX, mouseY);
+      float scaleAmt = curr_dist_to_cursor - init_dist_to_cursor;
+      screenZ = onClickCursorScale + scaleAmt;
+      break;
+      
+    case CURSOR_ROTATE:
+      PVector init_vect = new PVector(onClickMouseX - cursor_centerX, onClickMouseY - cursor_centerY); // vector from cursor center to initial mouse position
+      PVector curr_vect = new PVector(mouseX - cursor_centerX, mouseY - cursor_centerY); // vector from cursor center to current mouse position
+      
+      float angle = PVector.angleBetween(init_vect, curr_vect);
+      
+      // oh my god.... math..... i hate it
+      PVector crossProd = curr_vect.cross(init_vect);
+      
+      if (crossProd.z < 0) screenRotation = onClickCursorRotation + degrees(angle);
+      else screenRotation = onClickCursorRotation - degrees(angle);
+      break;
+     
+     case TARGET_TRANSLATE:
+       dx = mouseX - onClickMouseX;
+       dy = mouseY - onClickMouseY;
+       Target t = targets.get(trialIndex);
+       t.x = onClickTargetX + dx;
+       t.y = onClickTargetY + dy;
+    default:
+      break;
+  }
 }
 
+void drawCursorDots()
+{
+   cursorDots.clear();
+   float newX = 0, newY = 0;
+   float diam = max(18, screenZ*0.1); // default size, sometimes it's too small otherwise
+   fill(220);
+   // top-left
+   ellipse(-screenZ/2, -screenZ/2, diam, diam);
+   newX = screenX(-screenZ/2, -screenZ/2);
+   newY = screenY(-screenZ/2, -screenZ/2);
+   cursorDots.add(new CursorDot(newX, newY, diam/2));
+
+   // top-right
+   ellipse(screenZ/2, -screenZ/2, diam, diam);
+   newX = screenX(screenZ/2, -screenZ/2);
+   newY = screenY(screenZ/2, -screenZ/2);
+   cursorDots.add(new CursorDot(newX, newY, diam/2));
+   
+   // bottom-left
+   ellipse(-screenZ/2, screenZ/2, diam, diam);
+   newX = screenX(-screenZ/2, screenZ/2);
+   newY = screenY(-screenZ/2, screenZ/2);
+   cursorDots.add(new CursorDot(newX, newY, diam/2));
+
+   // bottom-right
+   ellipse(screenZ/2, screenZ/2, diam, diam);
+   newX = screenX(screenZ/2, screenZ/2);
+   newY = screenY(screenZ/2, screenZ/2);
+   cursorDots.add(new CursorDot(newX, newY, diam/2));
+}
+
+void drawCursorLines()
+{
+  strokeWeight(2f);
+  stroke(255,255,255,100);
+  float offset = min(30, screenZ*0.3);
+  float coord = screenZ/2 + offset;
+  line(0, -coord, 0, coord);
+  line(-coord, 0, coord, 0);
+}
+
+void drawTargetLines(Target t)
+{
+  strokeWeight(2f);
+  stroke(255, 255, 255,100);
+  float offset = min(40, t.z*0.4);
+  float coord = t.z/2 + offset;
+  line(0, -coord, 0, coord);
+  line(-coord, 0, coord, 0);
+}
+
+boolean isMouseInsideCursorDot() 
+{
+  //println(x + " " + y + " " + mouseX + " " + mouseY + " " + w/2);
+  for (CursorDot dot : cursorDots) {
+    float distToCenter = dist(mouseX, mouseY, dot.x, dot.y);
+    if (distToCenter <= dot.radius) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// hmm this does not quite work with rotations haha....someone pls help
+boolean isMouseInsideSquare(float x, float y, float z, float rotation)
+{
+  println("inside isMouseInsideCursorSquare");
+  float centerX = x+width/2;
+  float centerY = y+height/2;
+  float w = z;
+  boolean result = false;
+  
+  pushMatrix();
+  translate(centerX, centerY);
+  rotate(radians(rotation));
+  
+  //println("mouse X = " + mouseX);
+  //println("mouse Y = " + mouseY);
+  
+  //println("top left x = " + (centerX - w/2));
+  //println("top left y = " + (centerY - w/2));
+  
+  //println("bottom right x = " + (centerX + w/2));
+  //println("bottom right y = " + (centerY + w/2));
+  
+  result = (mouseX > (centerX - w/2)) && (mouseX < (centerX + w/2)) && 
+           (mouseX > (centerY - w/2)) && (mouseY < (centerY + w/2));
+  
+  popMatrix();
+  
+  // sanity check since sometimes it bugs out lololol (cry)
+  if (!result)
+    result = dist(centerX, centerY, mouseX, mouseY) <= w/2;
+  
+  println("result is " + result);
+  return result;
+}
 
 void mousePressed()
 {
@@ -155,26 +305,57 @@ void mousePressed()
       startTime = millis();
       println("time started!");
     }
+    
+    cursor_centerX = screenTransX+width/2;
+    cursor_centerY = screenTransY+height/2;
+    //println("cursor center x = " + cursor_centerX + ", center y = " + cursor_centerY);
+    onClickMouseX = mouseX;
+    onClickMouseY = mouseY;
+    //println("mouse x = " + onClickMouseX + ", mouse y = " + onClickMouseY);
+    onClickTransX = screenTransX;
+    onClickTransY = screenTransY;
+    onClickCursorScale = screenZ;
+    onClickCursorRotation = screenRotation;
+    
+    Target t = targets.get(trialIndex);
+    onClickTargetX = t.x;
+    onClickTargetY = t.y;
+    
+    // uhh reset this just in case
+    currentOp = NO_OP;
+    if (isMouseInsideCursorDot())
+      currentOp = CURSOR_SCALE;
+    else if (isMouseInsideSquare(screenTransX, screenTransY, screenZ, screenRotation))
+      currentOp = CURSOR_TRANSLATE;
+    else if (isMouseInsideSquare(t.x, t.y, t.z, t.rotation))
+      currentOp = TARGET_TRANSLATE;
+    else
+      currentOp = CURSOR_ROTATE;
 }
 
+void mouseDragged() {
+  controlLogic();
+}
 
 void mouseReleased()
-{
+{ 
+  currentOp = NO_OP;
+  
   //check to see if user clicked middle of screen within 3 inches
-  if (dist(width/2, height/2, mouseX, mouseY)<inchesToPixels(3f))
-  {
-    if (userDone==false && !checkForSuccess())
-      errorCount++;
+  //if (dist(width/2, height/2, mouseX, mouseY)<inchesToPixels(3f))
+  //{
+  //  if (userDone==false && !checkForSuccess())
+  //    errorCount++;
 
-    //and move on to next trial
-    trialIndex++;
+  //  //and move on to next trial
+  //  trialIndex++;
     
-    if (trialIndex==trialCount && userDone==false)
-    {
-      userDone = true;
-      finishTime = millis();
-    }
-  }
+  //  if (trialIndex==trialCount && userDone==false)
+  //  {
+  //    userDone = true;
+  //    finishTime = millis();
+  //  }
+  //}
 }
 
 //probably shouldn't modify this, but email me if you want to for some good reason.
