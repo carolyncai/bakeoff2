@@ -195,6 +195,8 @@ void controlLogic() {
        Target t = targets.get(trialIndex);
        t.x = onClickTargetX + dx;
        t.y = onClickTargetY + dy;
+       break;
+    
     default:
       break;
   }
