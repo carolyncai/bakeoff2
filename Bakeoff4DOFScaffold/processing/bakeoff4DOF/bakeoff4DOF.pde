@@ -131,8 +131,6 @@ void draw() {
   stroke(0);
   ellipse(0, 0, 15, 15);
   // target lines
-  strokeWeight(3f);
-  stroke(255, 255, 255);
   drawTargetLines(t);
   popMatrix();
 
@@ -235,6 +233,8 @@ void drawCursorDots()
 
 void drawCursorLines()
 {
+  strokeWeight(2f);
+  stroke(255,255,255,100);
   float offset = min(30, screenZ*0.3);
   float coord = screenZ/2 + offset;
   line(0, -coord, 0, coord);
@@ -243,7 +243,9 @@ void drawCursorLines()
 
 void drawTargetLines(Target t)
 {
-  float offset = min(40, screenZ*0.4);
+  strokeWeight(2f);
+  stroke(255, 255, 255,100);
+  float offset = min(40, t.z*0.4);
   float coord = t.z/2 + offset;
   line(0, -coord, 0, coord);
   line(-coord, 0, coord, 0);
