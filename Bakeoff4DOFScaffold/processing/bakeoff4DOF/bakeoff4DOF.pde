@@ -5,6 +5,7 @@ import java.util.Collections;
 int index = 0;
 int trialCount = 8; //this will be set higher for the bakeoff
 float border = 0; //have some padding from the sides
+float button_padding = 0; //padding for done button
 int trialIndex = 0; //what trial are we on
 int errorCount = 0;  //used to keep track of errors
 float errorPenalty = 0.5f; //for every error, add this to mean time
@@ -154,6 +155,14 @@ void draw() {
   fill(255);
   //scaffoldControlLogic(); //you are going to want to replace this!
   text("Trial " + (trialIndex+1) + " of " +trialCount, width/2, inchesToPixels(.5f));
+  
+  //===========DRAW DONE BUTTON=================
+  button_padding = inchesToPixels(1.5f);
+  rectMode(CENTER);
+  rect(width/2, button_padding, 100, 50);
+  fill(0);
+  textAlign(CENTER, CENTER);
+  text("DONE", width/2, button_padding, 100, 50);
 }
 
 
@@ -370,21 +379,25 @@ void mouseReleased()
 { 
   currentOp = NO_OP;
   
-  //check to see if user clicked middle of screen within 3 inches
-  //if (dist(width/2, height/2, mouseX, mouseY)<inchesToPixels(3f))
-  //{
-  //  if (userDone==false && !checkForSuccess())
-  //    errorCount++;
+  ////check to see if user clicked done button
+  if ((width/2 + 50 >= mouseX) && (mouseX >= width/2 - 50) 
+  && (button_padding - 25 <= mouseY) && (mouseY <= button_padding + 25))
+  {
+    print("DID IT HAPPEN");
+    if (userDone==false && !checkForSuccess())
+      errorCount++;
 
-  //  //and move on to next trial
-  //  trialIndex++;
+    //and move on to next trial
+    trialIndex++;
     
-  //  if (trialIndex==trialCount && userDone==false)
-  //  {
-  //    userDone = true;
-  //    finishTime = millis();
-  //  }
-  //}
+    if (trialIndex==trialCount && userDone==false)
+    {
+      userDone = true;
+      finishTime = millis();
+    }
+  } else {
+    print(inchesToPixels(1.5f), mouseY);
+  }
 }
 
 //probably shouldn't modify this, but email me if you want to for some good reason.
