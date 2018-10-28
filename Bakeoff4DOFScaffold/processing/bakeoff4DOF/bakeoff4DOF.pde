@@ -383,8 +383,13 @@ void mouseReleased()
   if ((width/2 + 50 >= mouseX) && (mouseX >= width/2 - 50) 
   && (button_padding - 25 <= mouseY) && (mouseY <= button_padding + 25))
   {
-    print("DID IT HAPPEN");
-    if (userDone==false && !checkForSuccess())
+    completeRound();
+  }
+    
+}
+
+void completeRound() {
+  if (userDone==false && !checkForSuccess())
       errorCount++;
 
     //and move on to next trial
@@ -395,9 +400,24 @@ void mouseReleased()
       userDone = true;
       finishTime = millis();
     }
-  } else {
-    print(inchesToPixels(1.5f), mouseY);
-  }
+}
+
+//Write double click code to finish a round
+int lastClick;
+int countClicks = 0;
+void mouseClicked() {
+  countClicks++;
+  if (countClicks==1)
+    lastClick=millis();
+  if (countClicks==2 && (millis()-lastClick)<500) {//if pressed twice
+    doubleClicked(); 
+    countClicks=0;
+  } else if ((millis()-lastClick)>500)
+    countClicks=0;
+}
+
+void doubleClicked(){
+  completeRound();
 }
 
 //probably shouldn't modify this, but email me if you want to for some good reason.
