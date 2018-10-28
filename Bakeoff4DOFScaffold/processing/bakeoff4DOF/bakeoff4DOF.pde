@@ -379,7 +379,7 @@ void mouseReleased()
 { 
   currentOp = NO_OP;
   
-  ////check to see if user clicked done button
+  //check to see if user clicked done button
   if ((width/2 + 50 >= mouseX) && (mouseX >= width/2 - 50) 
   && (button_padding - 25 <= mouseY) && (mouseY <= button_padding + 25))
   {
@@ -402,7 +402,7 @@ void completeRound() {
     }
 }
 
-//Write double click code to finish a round
+// processing has no double click function, so wrote a custom one here
 int lastClick;
 int countClicks = 0;
 void mouseClicked() {
