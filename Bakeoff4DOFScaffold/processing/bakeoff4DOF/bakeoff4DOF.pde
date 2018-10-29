@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -97,7 +98,6 @@ void setup() {
     targets.add(t);
     println("created target with " + t.x + "," + t.y + "," + t.rotation + "," + t.z);
   }
-
   Collections.shuffle(targets); // randomize the order of the button; don't change this.
 }
 
