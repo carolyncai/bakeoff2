@@ -410,8 +410,6 @@ void mouseClicked() {
   } else if ((millis()-lastClick) <= 500){
     doubleClicked();
     lastClick=0;
-  } else {
-    lastClick=0;
   }
 }
 
