@@ -177,8 +177,8 @@ void controlLogic() {
       screenTransY = onClickTransY + dy;
       
       // move the target square too
-      t.x = onClickTargetX - dx/2;
-      t.y = onClickTargetY - dy/2;
+      //t.x = onClickTargetX - dx/2;
+      //t.y = onClickTargetY - dy/2;
       break;
       
     case CURSOR_SCALE:
@@ -212,8 +212,8 @@ void controlLogic() {
        t.y = onClickTargetY + dy;
        
        // move the cursor square too
-       screenTransX = onClickTransX - dx/2;
-       screenTransY = onClickTransY - dy/2;
+       //screenTransX = onClickTransX - dx/2;
+       //screenTransY = onClickTransY - dy/2;
        
        break;
     
@@ -420,7 +420,7 @@ void mouseClicked() {
   if ((millis()-lastClick) > 500) {
     lastClick = millis();
   } else { //((millis()-lastClick) <= 500){
-    println("Double click");
+    //println("Double click");
     doubleClicked();
     lastClick=millis();
   } 
