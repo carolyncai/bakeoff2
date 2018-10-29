@@ -5,7 +5,7 @@ import java.util.Collections;
 int index = 0;
 int trialCount = 8; //this will be set higher for the bakeoff
 float border = 0; //have some padding from the sides
-float button_padding = 0; //padding for done button
+//float button_padding = 0; //padding for done button
 int trialIndex = 0; //what trial are we on
 int errorCount = 0;  //used to keep track of errors
 float errorPenalty = 0.5f; //for every error, add this to mean time
@@ -157,12 +157,12 @@ void draw() {
   text("Trial " + (trialIndex+1) + " of " +trialCount, width/2, inchesToPixels(.5f));
   
   //===========DRAW DONE BUTTON=================
-  button_padding = inchesToPixels(1.5f);
-  rectMode(CENTER);
-  rect(width/2, button_padding, 100, 50);
-  fill(0);
-  textAlign(CENTER, CENTER);
-  text("DONE", width/2, button_padding, 100, 50);
+  //button_padding = inchesToPixels(1.5f);
+  //rectMode(CENTER);
+  //rect(width/2, button_padding, 100, 50);
+  //fill(0);
+  //textAlign(CENTER, CENTER);
+  //text("DONE", width/2, button_padding, 100, 50);
 }
 
 
@@ -380,11 +380,11 @@ void mouseReleased()
   currentOp = NO_OP;
   
   //check to see if user clicked done button
-  if ((width/2 + 50 >= mouseX) && (mouseX >= width/2 - 50) 
-  && (button_padding - 25 <= mouseY) && (mouseY <= button_padding + 25))
-  {
-    completeRound();
-  }
+  //if ((width/2 + 50 >= mouseX) && (mouseX >= width/2 - 50) 
+  //&& (button_padding - 25 <= mouseY) && (mouseY <= button_padding + 25))
+  //{
+  //  completeRound();
+  //}
     
 }
 
@@ -404,16 +404,15 @@ void completeRound() {
 
 // processing has no double click function, so wrote a custom one here
 int lastClick;
-int countClicks = 0;
 void mouseClicked() {
-  countClicks++;
-  if (countClicks==1)
-    lastClick=millis();
-  if (countClicks==2 && (millis()-lastClick)<500) {//if pressed twice
-    doubleClicked(); 
-    countClicks=0;
-  } else if ((millis()-lastClick)>500)
-    countClicks=0;
+  if ((millis()-lastClick) > 500) {
+    lastClick = millis();
+  } else if ((millis()-lastClick) <= 500){
+    doubleClicked();
+    lastClick=0;
+  } else {
+    lastClick=0;
+  }
 }
 
 void doubleClicked(){
