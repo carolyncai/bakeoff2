@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -98,6 +97,7 @@ void setup() {
     targets.add(t);
     println("created target with " + t.x + "," + t.y + "," + t.rotation + "," + t.z);
   }
+
   Collections.shuffle(targets); // randomize the order of the button; don't change this.
 }
 
@@ -175,17 +175,23 @@ void controlLogic() {
       float dy = mouseY - onClickMouseY; 
       screenTransX = onClickTransX + dx;
       screenTransY = onClickTransY + dy;
+      
+      // move the target square too
+      //t.x = onClickTargetX - dx/2;
+      //t.y = onClickTargetY - dy/2;
       break;
       
     case CURSOR_SCALE:
+    case CURSOR_ROTATE:
+      // scale
       float init_dist_to_cursor = dist(cursor_centerX, cursor_centerY, onClickMouseX, onClickMouseY);
       float curr_dist_to_cursor = dist(cursor_centerX, cursor_centerY, mouseX, mouseY);
       float scaleAmt = curr_dist_to_cursor - init_dist_to_cursor;
       screenZ = onClickCursorScale + scaleAmt;
       t.z = onClickTargetScale - scaleAmt/2; // hmm
-      break;
+      //break;
       
-    case CURSOR_ROTATE:
+      // rotate
       PVector init_vect = new PVector(onClickMouseX - cursor_centerX, onClickMouseY - cursor_centerY); // vector from cursor center to initial mouse position
       PVector curr_vect = new PVector(mouseX - cursor_centerX, mouseY - cursor_centerY); // vector from cursor center to current mouse position
       
@@ -196,6 +202,7 @@ void controlLogic() {
       
       if (crossProd.z < 0) screenRotation = onClickCursorRotation + degrees(angle);
       else screenRotation = onClickCursorRotation - degrees(angle);
+      
       break;
      
      case TARGET_TRANSLATE:
@@ -203,6 +210,11 @@ void controlLogic() {
        dy = mouseY - onClickMouseY;
        t.x = onClickTargetX + dx;
        t.y = onClickTargetY + dy;
+       
+       // move the cursor square too
+       //screenTransX = onClickTransX - dx/2;
+       //screenTransY = onClickTransY - dy/2;
+       
        break;
     
     default:
@@ -245,7 +257,7 @@ void drawCursorLines()
 {
   Target t = targets.get(trialIndex);  
   boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation,screenRotation)<=5;
-  strokeWeight(2f);
+  strokeWeight(3f);
   if (closeRotation) stroke(0,255,237);
   else stroke(255,255,255,100);
   float offset = min(30, screenZ*0.3);
@@ -274,7 +286,7 @@ void drawCursorCenter()
 void drawTargetLines(Target t)
 {
   boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation,screenRotation)<=5;
-  strokeWeight(2f);
+  strokeWeight(3f);
   if (closeRotation) stroke(0,255,237);
   else stroke(255,255,255,100);
   float offset = min(40, t.z*0.4);
@@ -408,9 +420,13 @@ void mouseClicked() {
   if ((millis()-lastClick) > 500) {
     lastClick = millis();
   } else { //((millis()-lastClick) <= 500){
+    //println("Double click");
     doubleClicked();
     lastClick=millis();
   } 
+  // else { 
+  //  lastClick=0;
+  //}
 }
 
 void doubleClicked(){
@@ -420,16 +436,16 @@ void doubleClicked(){
 //probably shouldn't modify this, but email me if you want to for some good reason.
 public boolean checkForSuccess()
 {
-	Target t = targets.get(trialIndex);	
-	boolean closeDist = dist(t.x,t.y,screenTransX,screenTransY)<inchesToPixels(.05f); //has to be within .1"
+  Target t = targets.get(trialIndex);  
+  boolean closeDist = dist(t.x,t.y,screenTransX,screenTransY)<inchesToPixels(.05f); //has to be within .1"
   boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation,screenRotation)<=5;
-	boolean closeZ = abs(t.z - screenZ)<inchesToPixels(.05f); //has to be within .1"	
-	
-  println("Close Enough Distance: " + closeDist + " (cursor X/Y = " + t.x + "/" + t.y + ", target X/Y = " + screenTransX + "/" + screenTransY +")");
-  println("Close Enough Rotation: " + closeRotation + " (rot dist="+calculateDifferenceBetweenAngles(t.rotation,screenRotation)+")");
- 	println("Close Enough Z: " +  closeZ + " (cursor Z = " + t.z + ", target Z = " + screenZ +")");
-	
-	return closeDist && closeRotation && closeZ;	
+  boolean closeZ = abs(t.z - screenZ)<inchesToPixels(.05f); //has to be within .1"  
+  
+  //println("Close Enough Distance: " + closeDist + " (cursor X/Y = " + t.x + "/" + t.y + ", target X/Y = " + screenTransX + "/" + screenTransY +")");
+  //println("Close Enough Rotation: " + closeRotation + " (rot dist="+calculateDifferenceBetweenAngles(t.rotation,screenRotation)+")");
+   //println("Close Enough Z: " +  closeZ + " (cursor Z = " + t.z + ", target Z = " + screenZ +")");
+  
+  return closeDist && closeRotation && closeZ;  
 }
 
 //utility function I include
