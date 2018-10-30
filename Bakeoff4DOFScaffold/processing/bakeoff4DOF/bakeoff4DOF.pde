@@ -188,7 +188,7 @@ void controlLogic() {
       float curr_dist_to_cursor = dist(cursor_centerX, cursor_centerY, mouseX, mouseY);
       float scaleAmt = curr_dist_to_cursor - init_dist_to_cursor;
       screenZ = onClickCursorScale + scaleAmt;
-      t.z = onClickTargetScale - scaleAmt/2; // hmm
+      t.z = max(inchesToPixels(.15f), onClickTargetScale - scaleAmt/2); // hmm
       //break;
       
       // rotate
@@ -390,14 +390,7 @@ void mouseDragged() {
 void mouseReleased()
 { 
   currentOp = NO_OP;
-  
-  //check to see if user clicked done button
-  //if ((width/2 + 50 >= mouseX) && (mouseX >= width/2 - 50) 
-  //&& (button_padding - 25 <= mouseY) && (mouseY <= button_padding + 25))
-  //{
-  //  completeRound();
-  //}
-    
+  checkDoubleClick();
 }
 
 void completeRound() {
@@ -416,20 +409,29 @@ void completeRound() {
 
 // processing has no double click function, so wrote a custom one here
 int lastClick;
-void mouseClicked() {
+int lastClickMouseX;
+int lastClickMouseY;
+void checkDoubleClick() {
   if ((millis()-lastClick) > 500) {
+    lastClickMouseX = mouseX;
+    lastClickMouseY = mouseY;
     lastClick = millis();
-  } else { //((millis()-lastClick) <= 500){
-    //println("Double click");
-    doubleClicked();
+  } else {
     lastClick=millis();
+    if (dist(mouseX, mouseY, lastClickMouseX, lastClickMouseY) < 10) {
+      doubleClicked(); // double click is close together
+    }
+    lastClickMouseX = mouseX;
+    lastClickMouseY = mouseY;
   } 
-  // else { 
-  //  lastClick=0;
-  //}
 }
 
 void doubleClicked(){
+  completeRound();
+}
+
+// temp....
+void keyPressed() {
   completeRound();
 }
 
