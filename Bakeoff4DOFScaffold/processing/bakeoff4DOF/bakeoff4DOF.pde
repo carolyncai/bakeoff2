@@ -142,7 +142,7 @@ void draw() {
   strokeWeight(3f);
   boolean closeZ = abs(t.z - screenZ)<inchesToPixels(.05f);
   // change the color if scale close enough
-  if (closeZ) stroke(0,255,237);
+  if (closeZ) stroke(57,255,0);
   else stroke(180);
   rect(0,0, screenZ, screenZ);
   drawCursorDots();
@@ -188,7 +188,7 @@ void controlLogic() {
       float curr_dist_to_cursor = dist(cursor_centerX, cursor_centerY, mouseX, mouseY);
       float scaleAmt = curr_dist_to_cursor - init_dist_to_cursor;
       screenZ = onClickCursorScale + scaleAmt;
-      t.z = max(inchesToPixels(.15f), onClickTargetScale - scaleAmt/2); // hmm
+      t.z = onClickTargetScale - scaleAmt/2; // hmm
       //break;
       
       // rotate
@@ -258,7 +258,7 @@ void drawCursorLines()
   Target t = targets.get(trialIndex);  
   boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation,screenRotation)<=5;
   strokeWeight(3f);
-  if (closeRotation) stroke(0,255,237);
+  if (closeRotation) stroke(57,255,0);
   else stroke(255,255,255,100);
   float offset = min(30, screenZ*0.3);
   float coord = screenZ/2 + offset;
@@ -271,7 +271,7 @@ void drawCursorCenter()
   Target t = targets.get(trialIndex);
   boolean closeDist = dist(t.x,t.y,screenTransX,screenTransY)<inchesToPixels(.05f);
   if (closeDist) {
-    fill(0,255,237);
+    fill(57,255,0);
     noStroke();
     ellipse(0, 0, 15, 15);
   }
@@ -287,7 +287,7 @@ void drawTargetLines(Target t)
 {
   boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation,screenRotation)<=5;
   strokeWeight(3f);
-  if (closeRotation) stroke(0,255,237);
+  if (closeRotation) stroke(57,255,0);
   else stroke(255,255,255,100);
   float offset = min(40, t.z*0.4);
   float coord = t.z/2 + offset;
@@ -299,7 +299,7 @@ void drawTargetCenter(Target t)
 {
   boolean closeDist = dist(t.x,t.y,screenTransX,screenTransY)<inchesToPixels(.05f);
   if (closeDist) {
-    fill(0,255,237);
+    fill(57,255,0);
     noStroke();
     ellipse(0, 0, 15, 15);
   }
@@ -408,6 +408,7 @@ void completeRound() {
 }
 
 // processing has no double click function, so wrote a custom one here
+
 int lastClick;
 int lastClickMouseX;
 int lastClickMouseY;
