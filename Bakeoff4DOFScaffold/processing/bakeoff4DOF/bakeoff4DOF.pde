@@ -376,7 +376,7 @@ void mousePressed()
     currentOp = NO_OP;
     if (isMouseInsideCursorDot())
       currentOp = CURSOR_SCALE;
-    else if (isMouseInsideSquapre(screenTransX, screenTransY, screenZ, screenRotation))
+    else if (isMouseInsideSquare(screenTransX, screenTransY, screenZ, screenRotation))
       currentOp = CURSOR_TRANSLATE;
     else if (isMouseInsideSquare(t.x, t.y, t.z, t.rotation))
       currentOp = TARGET_TRANSLATE;
