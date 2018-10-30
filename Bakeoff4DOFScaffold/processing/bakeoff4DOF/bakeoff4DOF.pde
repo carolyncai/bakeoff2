@@ -142,7 +142,7 @@ void draw() {
   strokeWeight(3f);
   boolean closeZ = abs(t.z - screenZ)<inchesToPixels(.05f);
   // change the color if scale close enough
-  if (closeZ) stroke(0,255,237);
+  if (closeZ) stroke(57,255,0);
   else stroke(180);
   rect(0,0, screenZ, screenZ);
   drawCursorDots();
@@ -258,7 +258,7 @@ void drawCursorLines()
   Target t = targets.get(trialIndex);  
   boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation,screenRotation)<=5;
   strokeWeight(3f);
-  if (closeRotation) stroke(0,255,237);
+  if (closeRotation) stroke(57,255,0);
   else stroke(255,255,255,100);
   float offset = min(30, screenZ*0.3);
   float coord = screenZ/2 + offset;
@@ -271,7 +271,7 @@ void drawCursorCenter()
   Target t = targets.get(trialIndex);
   boolean closeDist = dist(t.x,t.y,screenTransX,screenTransY)<inchesToPixels(.05f);
   if (closeDist) {
-    fill(0,255,237);
+    fill(57,255,0);
     noStroke();
     ellipse(0, 0, 15, 15);
   }
@@ -287,7 +287,7 @@ void drawTargetLines(Target t)
 {
   boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation,screenRotation)<=5;
   strokeWeight(3f);
-  if (closeRotation) stroke(0,255,237);
+  if (closeRotation) stroke(57,255,0);
   else stroke(255,255,255,100);
   float offset = min(40, t.z*0.4);
   float coord = t.z/2 + offset;
@@ -299,7 +299,7 @@ void drawTargetCenter(Target t)
 {
   boolean closeDist = dist(t.x,t.y,screenTransX,screenTransY)<inchesToPixels(.05f);
   if (closeDist) {
-    fill(0,255,237);
+    fill(57,255,0);
     noStroke();
     ellipse(0, 0, 15, 15);
   }
@@ -347,6 +347,7 @@ boolean isMouseInsideSquare(float x, float y, float z, float rotation)
   return result;
 }
 
+int lastClick;
 void mousePressed()
 {
     if (startTime == 0) //start time on the instant of the first user click
@@ -354,7 +355,7 @@ void mousePressed()
       startTime = millis();
       println("time started!");
     }
-    
+    lastClick = millis();
     cursor_centerX = screenTransX+width/2;
     cursor_centerY = screenTransY+height/2;
     //println("cursor center x = " + cursor_centerX + ", center y = " + cursor_centerY);
@@ -375,7 +376,7 @@ void mousePressed()
     currentOp = NO_OP;
     if (isMouseInsideCursorDot())
       currentOp = CURSOR_SCALE;
-    else if (isMouseInsideSquare(screenTransX, screenTransY, screenZ, screenRotation))
+    else if (isMouseInsideSquapre(screenTransX, screenTransY, screenZ, screenRotation))
       currentOp = CURSOR_TRANSLATE;
     else if (isMouseInsideSquare(t.x, t.y, t.z, t.rotation))
       currentOp = TARGET_TRANSLATE;
@@ -390,14 +391,9 @@ void mouseDragged() {
 void mouseReleased()
 { 
   currentOp = NO_OP;
-  
-  //check to see if user clicked done button
-  //if ((width/2 + 50 >= mouseX) && (mouseX >= width/2 - 50) 
-  //&& (button_padding - 25 <= mouseY) && (mouseY <= button_padding + 25))
-  //{
-  //  completeRound();
-  //}
-    
+  if ((millis()-lastClick <= 300 ) && (isMouseInsideSquare(screenTransX, screenTransY, screenZ, screenRotation))) {
+    completeRound();
+  }
 }
 
 void completeRound() {
@@ -415,23 +411,20 @@ void completeRound() {
 }
 
 // processing has no double click function, so wrote a custom one here
-int lastClick;
-void mouseClicked() {
-  if ((millis()-lastClick) > 500) {
-    lastClick = millis();
-  } else { //((millis()-lastClick) <= 500){
-    //println("Double click");
-    doubleClicked();
-    lastClick=millis();
-  } 
-  // else { 
-  //  lastClick=0;
-  //}
-}
+//int lastClick;
+//void mouseClicked() {
+//  if ((millis()-lastClick) > 500) {
+//    lastClick = millis();
+//  } else { //((millis()-lastClick) <= 500){
+//    //println("Double click");
+//    doubleClicked();
+//    lastClick=millis();
+//  } 
+//}
 
-void doubleClicked(){
-  completeRound();
-}
+//void doubleClicked(){
+//  completeRound();
+//}
 
 //probably shouldn't modify this, but email me if you want to for some good reason.
 public boolean checkForSuccess()
