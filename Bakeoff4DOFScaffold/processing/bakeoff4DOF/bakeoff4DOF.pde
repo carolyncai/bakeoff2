@@ -259,7 +259,7 @@ void drawCursorLines()
   boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation,screenRotation)<=5;
   strokeWeight(3f);
   if (closeRotation) stroke(57,255,0);
-  else stroke(255,255,255,100);
+  else stroke(240,240,240,100);
   float offset = min(30, screenZ*0.3);
   float coord = screenZ/2 + offset;
   line(0, -coord, 0, coord);
@@ -270,17 +270,16 @@ void drawCursorCenter()
 {
   Target t = targets.get(trialIndex);
   boolean closeDist = dist(t.x,t.y,screenTransX,screenTransY)<inchesToPixels(.05f);
+  int radius = 2;
   if (closeDist) {
     fill(57,255,0);
-    noStroke();
-    ellipse(0, 0, 15, 15);
   }
   else {
-    fill(255,255,255,100);
-    strokeWeight(1);
-    stroke(255);
-    ellipse(0, 0, 15, 15);
+    fill(255);
+    //ellipse(0, 0, 2, 2); // hmmMMM
   }
+  ellipse(0, 0, radius, radius);
+  
 }
 
 void drawTargetLines(Target t)
@@ -288,8 +287,8 @@ void drawTargetLines(Target t)
   boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation,screenRotation)<=5;
   strokeWeight(3f);
   if (closeRotation) stroke(57,255,0);
-  else stroke(255,255,255,100);
-  float offset = min(40, t.z*0.4);
+  else stroke(240,240,240,100);
+  float offset = min(50, t.z*0.4);
   float coord = t.z/2 + offset;
   line(0, -coord, 0, coord);
   line(-coord, 0, coord, 0);
@@ -298,17 +297,16 @@ void drawTargetLines(Target t)
 void drawTargetCenter(Target t)
 {
   boolean closeDist = dist(t.x,t.y,screenTransX,screenTransY)<inchesToPixels(.05f);
+  int radius = (int)inchesToPixels(.05f);
   if (closeDist) {
     fill(57,255,0);
+    radius = 15;
     noStroke();
-    ellipse(0, 0, 15, 15);
   }
   else {
-    fill(0,0,0,100);
-    strokeWeight(1);
-    stroke(0);
-    ellipse(0, 0, 15, 15);
+    fill(0);
   }
+  ellipse(0, 0, radius, radius);
 }
 
 boolean isMouseInsideCursorDot() 
@@ -376,7 +374,7 @@ void mousePressed()
     currentOp = NO_OP;
     if (isMouseInsideCursorDot())
       currentOp = CURSOR_SCALE;
-    else if (isMouseInsideSquapre(screenTransX, screenTransY, screenZ, screenRotation))
+    else if (isMouseInsideSquare(screenTransX, screenTransY, screenZ, screenRotation))
       currentOp = CURSOR_TRANSLATE;
     else if (isMouseInsideSquare(t.x, t.y, t.z, t.rotation))
       currentOp = TARGET_TRANSLATE;
