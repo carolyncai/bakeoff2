@@ -63,9 +63,9 @@ ArrayList<CursorDot> cursorDots = new ArrayList<CursorDot>();
 
 // Operations
 final int NO_OP = -1;
-final int CURSOR_SCALE = 0;
+final int CURSOR_SCALE_ROTATE = 0;
 final int CURSOR_TRANSLATE = 1;
-final int CURSOR_ROTATE = 2;
+//final int CURSOR_ROTATE = 2;
 //final int TARGET_SCALE = 3;
 final int TARGET_TRANSLATE = 4;
 //final int TARGET_ROTATE = 5;
@@ -181,15 +181,13 @@ void controlLogic() {
       //t.y = onClickTargetY - dy/2;
       break;
       
-    case CURSOR_SCALE:
-    case CURSOR_ROTATE:
+    case CURSOR_SCALE_ROTATE:
       // scale
       float init_dist_to_cursor = dist(cursor_centerX, cursor_centerY, onClickMouseX, onClickMouseY);
       float curr_dist_to_cursor = dist(cursor_centerX, cursor_centerY, mouseX, mouseY);
       float scaleAmt = curr_dist_to_cursor - init_dist_to_cursor;
       screenZ = onClickCursorScale + scaleAmt;
       t.z = onClickTargetScale - scaleAmt/2; // hmm
-      //break;
       
       // rotate
       PVector init_vect = new PVector(onClickMouseX - cursor_centerX, onClickMouseY - cursor_centerY); // vector from cursor center to initial mouse position
@@ -375,13 +373,13 @@ void mousePressed()
     // uhh reset this just in case
     currentOp = NO_OP;
     if (isMouseInsideCursorDot())
-      currentOp = CURSOR_SCALE;
+      currentOp = CURSOR_SCALE_ROTATE;
     else if (isMouseInsideSquare(screenTransX, screenTransY, screenZ, screenRotation))
       currentOp = CURSOR_TRANSLATE;
     else if (isMouseInsideSquare(t.x, t.y, t.z, t.rotation))
       currentOp = TARGET_TRANSLATE;
     else
-      currentOp = CURSOR_ROTATE;
+      currentOp = CURSOR_SCALE_ROTATE;
 }
 
 void mouseDragged() {
@@ -390,10 +388,12 @@ void mouseDragged() {
 
 void mouseReleased()
 { 
-  currentOp = NO_OP;
-  if ((millis()-lastClick <= 300 ) && (isMouseInsideSquare(screenTransX, screenTransY, screenZ, screenRotation))) {
-    completeRound();
+  if (currentOp == CURSOR_SCALE_ROTATE) {
+    currentOp = NO_OP;
+    completeRound(); // go on after letting go of mouse on scale/rotate
   }
+  else currentOp = NO_OP;
+  
 }
 
 void completeRound() {
@@ -409,22 +409,6 @@ void completeRound() {
       finishTime = millis();
     }
 }
-
-// processing has no double click function, so wrote a custom one here
-//int lastClick;
-//void mouseClicked() {
-//  if ((millis()-lastClick) > 500) {
-//    lastClick = millis();
-//  } else { //((millis()-lastClick) <= 500){
-//    //println("Double click");
-//    doubleClicked();
-//    lastClick=millis();
-//  } 
-//}
-
-//void doubleClicked(){
-//  completeRound();
-//}
 
 //probably shouldn't modify this, but email me if you want to for some good reason.
 public boolean checkForSuccess()
