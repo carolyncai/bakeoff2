@@ -400,6 +400,9 @@ void completeRound() {
   if (userDone==false && !checkForSuccess())
       errorCount++;
 
+    // reset cursor size if too small
+    if (screenZ < inchesToPixels(.5f)) screenZ = 50f;
+    
     //and move on to next trial
     trialIndex++;
     
