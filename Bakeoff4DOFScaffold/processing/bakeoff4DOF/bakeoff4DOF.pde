@@ -267,17 +267,18 @@ void drawCursorLines()
 void drawCursorCenter()
 {
   Target t = targets.get(trialIndex);
+  int radius = min(15, (int)t.z/2);
   boolean closeDist = dist(t.x,t.y,screenTransX,screenTransY)<inchesToPixels(.05f);
   if (closeDist) {
     fill(57,255,0);
     noStroke();
-    ellipse(0, 0, 15, 15);
+    ellipse(0, 0, radius, radius);
   }
   else {
     fill(255,255,255,100);
     strokeWeight(1);
     stroke(255);
-    ellipse(0, 0, 15, 15);
+    ellipse(0, 0, radius, radius);
   }
 }
 
@@ -296,16 +297,17 @@ void drawTargetLines(Target t)
 void drawTargetCenter(Target t)
 {
   boolean closeDist = dist(t.x,t.y,screenTransX,screenTransY)<inchesToPixels(.05f);
+  int radius = min(15, (int)t.z/2);
   if (closeDist) {
     fill(57,255,0);
     noStroke();
-    ellipse(0, 0, 15, 15);
+    ellipse(0, 0, radius, radius);
   }
   else {
     fill(0,0,0,100);
     strokeWeight(1);
     stroke(0);
-    ellipse(0, 0, 15, 15);
+    ellipse(0, 0, radius, radius);
   }
 }
 
