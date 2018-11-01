@@ -139,10 +139,13 @@ void draw() {
   translate(screenTransX, screenTransY);
   rotate(radians(screenRotation));
   noFill();
-  strokeWeight(4f);
+  strokeWeight(3f);
   boolean closeZ = abs(t.z - screenZ)<inchesToPixels(.05f);
   // change the color if scale close enough
-  if (closeZ) stroke(57,255,0);
+  if (closeZ) {
+    strokeWeight(4f);
+    stroke(57,255,0);
+  }
   else stroke(180);
   rect(0,0, screenZ, screenZ);
   drawCursorDots();
@@ -255,8 +258,11 @@ void drawCursorLines()
 {
   Target t = targets.get(trialIndex);  
   boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation,screenRotation)<=5;
-  strokeWeight(4f);
-  if (closeRotation) stroke(57,255,0);
+  strokeWeight(3f);
+  if (closeRotation) {
+    strokeWeight(4f);
+    stroke(57,255,0);
+  }
   else stroke(255,255,255,100);
   float offset = min(30, screenZ*0.3);
   float coord = screenZ/2 + offset;
@@ -285,8 +291,11 @@ void drawCursorCenter()
 void drawTargetLines(Target t)
 {
   boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation,screenRotation)<=5;
-  strokeWeight(4f);
-  if (closeRotation) stroke(57,255,0);
+  strokeWeight(3f);
+  if (closeRotation) {
+    strokeWeight(4f);
+    stroke(57,255,0);
+  }
   else stroke(255,255,255,100);
   float offset = min(40, t.z*0.4);
   float coord = t.z/2 + offset;
